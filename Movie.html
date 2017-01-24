@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Movie Library Management</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.common.min.css">
+    <link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.rtl.min.css">
+    <link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.default.min.css">
+    <link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.mobile.all.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://kendo.cdn.telerik.com/2017.1.118/js/angular.min.js"></script>
+    <script src="http://kendo.cdn.telerik.com/2017.1.118/js/jszip.min.js"></script>
+    <script src="http://kendo.cdn.telerik.com/2017.1.118/js/kendo.all.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!--<br />
+        <br />-->
+        
+        <!--<div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+               
+                <div style="margin-top:10px;">
+                    <input id="EmailId" type="text" class="k-input k-textbox" placeholder="Enter EmailId" />
+
+                    <input id="SignIn" type="button" class="btn btn-info" value="Sign In" />
+                </div>
+            </div>
+        </div>-->
+        <br />
+        <br />
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <input id="SearchView" type="button" class="btn btn-info" value="Search view" />
+                <input id="LibraryView" type="button" class="btn btn-success" value="Library view" />
+
+                <div style="float:right;margin-top:10px;">
+                    <input id="MovieName" type="text" class="k-input k-textbox" placeholder="Movie Name" />
+                    
+                    <input id="SearchMovie" type="button" class="btn btn-info" value="Search Movie" />
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
+        <br />
+        <br />
+        <div class="row" id="SearchViewGrid">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="grid"></div>
+            </div>
+        </div>
+
+        <div class="row" id="LibraryViewGrid" hidden="hidden">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="gridLibrary"></div>
+            </div>
+        </div>
+
+    </div>
+    
+    <!--<script src="js/MovieJS.js"></script>-->
+
+    <script>
+        $("#SearchMovie").click(function () {
+            $("#grid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: "http://www.omdbapi.com/?t=" + $("#MovieName").val() + "&y=&plot=short&r=json"
+                    },
+                    schema: {
+                        model: {
+                            id: "Title",
+                            fields: {
+                                Title: { type: "string" },
+                                Writer: { type: "string" },
+                                Plot: { type: "string" },
+                                Genre: { type: "string" },
+                                Type: { type: "string" }
+
+                            }
+                        }
+                    },
+                    pageSize: 20,
+                    serverPaging: true,
+                    serverFiltering: true,
+                    serverSorting: true
+                },
+                filterable: true,
+                sortable: true,
+                pageable: true,
+                columns: [
+                            {
+                                field: "Title",
+                                width: 100
+                            }, {
+                                field: "Writer",
+                                title: "Writer",
+                                hidden: true
+                            }, {
+                                field: "Plot",
+                                title: "Plot",
+                                hidden: true
+                            }, {
+                                field: "Genre",
+                                title: "Genre",
+                                hidden: true
+                            },
+                            {
+                                field: "Type",
+                                title: "Type",
+                                hidden: true
+                            },
+                             { command: { text: "Add to library", click: addMoviesToLibrary }, title: " ", }
+                ],
+
+            });
+        });
+
+        function addMoviesToLibrary(e) {
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var GridMovies;
+            if (localStorage.getItem("Movies") == undefined) {
+
+                var GridMovies = [];
+            }
+
+            else {
+                GridMovies = JSON.parse(localStorage.getItem("Movies"));
+                GridMovies.push(dataItem);
+            }
+            localStorage.setItem("Movies", JSON.stringify(GridMovies));
+
+        }
+
+        $("#LibraryView").click(function () {
+            $("#LibraryViewGrid").show();
+            $("#grid").hide();
+            $("#gridLibrary").kendoGrid({
+                columns: [
+                                {
+                                    field: "Title",
+                                    title: "Movie Title",
+                                }, {
+                                    field: "Writer",
+                                    title: "Writer",
+                                    hidden: true
+                                }, {
+                                    field: "Plot",
+                                    title: "Plot",
+                                    hidden: true
+                                }, {
+                                    field: "Genre",
+                                    title: "Genre",
+                                    hidden: true
+                                }, {
+                                    field: "Type",
+                                    title: "Type",
+                                    hidden: true
+                                },
+                                { command: { text: "Add Rating", click: addRating }, title: " ", }
+                ],
+                dataSource: JSON.parse(localStorage.getItem("Movies"))
+            });
+        });
+
+        function addRating(e) {
+
+
+            e.preventDefault();
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+            var Rating = prompt("Please enter rating out of 5", "3");
+            if (Rating != null) {
+                //if(dataItem.Title)
+                alert("Rating Added");
+
+            }
+        }
+
+        $("#SearchView").click(function () {
+            $("#LibraryViewGrid").hide();
+            $("#grid").show();
+        });
+
+    </script>
+</body>
+</html>
