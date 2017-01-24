@@ -54,7 +54,7 @@
                 if (data.Response != "False") {
                     var dataSourceKendoMovie = new kendo.data.DataSource({
                         transport: {
-                            read: "http://www.omdbapi.com/?t=" + $("#MovieName").val() + "&y=&plot=short&r=json"
+                            read: "https://www.omdbapi.com/?t=" + $("#MovieName").val() + "&y=&plot=short&r=json"
                         },
                         schema: {
                             model: {
